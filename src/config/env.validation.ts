@@ -1,15 +1,28 @@
-import * as Joi from 'joi';
+import { z } from 'zod';
 
-export const envValidationSchema = Joi.object({
-  PORT: Joi.number().default(5000),
-
-  NODE_ENV: Joi.string()
-    .valid('development', 'production', 'test')
+const envSchema = z.object({
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
     .default('development'),
 
-  DATABASE_URL: Joi.string().required(),
+  PORT: z.coerce.number().default(3000),
 
-  JWT_SECRET: Joi.string().required(),
+  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
 
-  JWT_EXPIRES_IN: Joi.string().required(),
+  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
+
+  JWT_EXPIRES_IN: z.string().default('7d'),
 });
+
+export function validate(config: Record<string, unknown>) {
+  const result = envSchema.safeParse(config);
+
+  if (!result.success) {
+    console.error('❌ Environment validation failed');
+    console.error(result.error.flatten().fieldErrors);
+
+    throw new Error('Invalid environment variables');
+  }
+
+  return result.data;
+}
