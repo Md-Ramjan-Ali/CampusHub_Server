@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
 import configuration from './config/configuration';
-import { envValidationSchema } from './config/env.validation';
-import { ConfigModule } from '@nestjs/config';
+import { validate } from './config/env.validation';
 
 @Module({
   imports: [
@@ -10,7 +10,7 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
       cache: true,
       load: [configuration],
-      validationSchema: envValidationSchema,
+      validate,
       expandVariables: true,
     }),
   ],
